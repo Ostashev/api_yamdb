@@ -14,6 +14,12 @@ from users.models import User
 from users.utils import generate_confirmation_code
 from .serializers import UserSerializer, UserAdminSerializer, SignUpSerializer, GetTokenSerializer
 
+from django.shortcuts import get_object_or_404
+
+from rest_framework import viewsets
+
+from titles.models import Comment, Review, Title
+
 
 class UserViewSet(viewsets.ModelViewSet):
     queryset = User.objects.all()
@@ -74,3 +80,32 @@ def get_and_send_confirmation_code(data):
     subject = 'Ваш код, для получения token.'
     message = f'Для получения token отправьте код {confirmation_code} и имя пользователя на адрес: http://127.0.0.1:8000/api/v1/auth/token/'
     send_mail(subject, message, '123@rt.ru', [data[0].email])
+
+
+class ReviewViewSet(viewsets.ModelViewSet):
+    permission_classes = ...
+    pagination_class = ...
+
+    def get_queryset(self):
+        return Review.objects.filter(title=self.kwargs.get('title_id'))
+
+    def perform_create(self, serializer):
+        serializer.save(
+            author=self.request.user,
+            title=get_object_or_404(Title, id=self.kwargs.get('title_id'))
+        )
+
+
+class CommentViewSet(viewsets.ModelViewSet):
+    permission_classes = ...
+    pagination_class = ...
+
+    def get_queryset(self):
+        return Comment.objects.filter(review=self.kwargs.get('review_id'))
+
+    def perform_create(self, serializer):
+        serializer.save(
+            author=self.request.user,
+            review=get_object_or_404(Review, id=self.kwargs.get('review_id'))
+        )
+
