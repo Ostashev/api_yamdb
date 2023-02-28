@@ -1,6 +1,7 @@
 from django.contrib.auth import get_user_model
 from django.db import models
 
+
 User = get_user_model()
 
 
@@ -24,20 +25,6 @@ class Genre(models.Model):
         verbose_name = 'Жанр'
         verbose_name_plural = 'Жанры'
 
-
-class Title(models.Model):
-    name = models.CharField(max_length=256)
-    # year =
-    description = models.TextField(max_length=256, blank=True)
-    genre = models.ManyToManyField(
-        Genre, related_name='titles',
-    )
-    category = models.ForeignKey(
-        Category, on_delete=models.SET_NULL,
-        related_name='titles', null=True, blank=True
-    )
-
-
 class Reviews(models.Model):
     title = models.ForeignKey(
         Title, on_delete=models.CASCADE, related_name='reviews'
@@ -55,8 +42,20 @@ class Reviews(models.Model):
         verbose_name = 'Отзыв'
         verbose_name_plural = 'Отзывы'
 
+
+User = get_user_model()
+
+
+class Title(models.Model):
+    text = models.TextField()
+    author = models.ForeignKey(
+        User, on_delete=models.CASCADE, related_name='titles'
+    )
+    pub_date = models.DateTimeField(auto_now_add=True)
+
     def __str__(self):
         return self.text
+
 
 
 class Comment(models.Model):
@@ -72,3 +71,12 @@ class Comment(models.Model):
     class Meta:
         verbose_name = 'Комментарий'
         verbose_name_plural = 'Комментарии'
+
+class Review(models.Model):
+    title = models.ForeignKey(
+        Title, on_delete=models.CASCADE, related_name='reviews')
+    text = models.TextField()
+    author = models.ForeignKey(
+        User, on_delete=models.CASCADE, related_name='reviews')
+    score = models.IntegerField()
+    pub_date = models.DateTimeField(auto_now_add=True)
