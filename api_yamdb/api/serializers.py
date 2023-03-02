@@ -2,6 +2,7 @@ from rest_framework import serializers
 from titles.models import Comment, Review
 
 from users.models import User
+from rest_framework.validators import UniqueTogetherValidator
 
 
 class UserSerializer(serializers.ModelSerializer):
@@ -11,8 +12,8 @@ class UserSerializer(serializers.ModelSerializer):
     [POST] заполнение полей 'first_name', 'last_name' и 'bio'.
     """
     role = serializers.StringRelatedField(read_only=True)
-    username = serializers.SlugField(read_only=True)
-    email = serializers.SlugField(read_only=True)
+    #username = serializers.SlugField(read_only=True)
+    #email = serializers.SlugField(max_length=254, read_only=True)
 
     class Meta:
         model = User
@@ -45,13 +46,19 @@ class UserAdminSerializer(serializers.ModelSerializer):
             'bio',
             'role',
         )
-
-    def validate(self, value):
-        if value == 'me':
-            raise serializers.ValidationError(
-                'Использовать имя "me" в качестве username запрещено!'
+        validators = [
+            UniqueTogetherValidator(
+                queryset=User.objects.all(),
+                fields=['username', 'email']
             )
-        return value
+        ]
+
+    # def validate(self, value):
+    #     if value == 'me':
+    #         raise serializers.ValidationError(
+    #             'Использовать имя "me" в качестве username запрещено!'
+    #         )
+    #     return value
 
 
 class SignUpSerializer(serializers.ModelSerializer):
@@ -60,7 +67,7 @@ class SignUpSerializer(serializers.ModelSerializer):
         fields = ('username', 'email')
 
     def validate(self, value):
-        if value == 'me':
+        if value['username'] == 'me':
             raise serializers.ValidationError(
                 'Использовать имя "me" в качестве username запрещено!'
             )

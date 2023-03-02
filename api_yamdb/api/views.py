@@ -9,10 +9,13 @@ from rest_framework.decorators import action, api_view, permission_classes
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework_simplejwt.tokens import RefreshToken
 from django.shortcuts import get_object_or_404
+from rest_framework.pagination import PageNumberPagination
+from rest_framework import mixins
 
 from users.models import User
 from users.utils import generate_confirmation_code
 from .serializers import UserSerializer, UserAdminSerializer, SignUpSerializer, GetTokenSerializer
+from . permissions import IsAdmin, IsAdminSuperuser, IsAuthorModeratorAdminSuperuserOrReadOnly
 
 from django.shortcuts import get_object_or_404
 
@@ -32,19 +35,21 @@ RATING_DIGITS_SHOWN = 2
 class UserViewSet(viewsets.ModelViewSet):
     queryset = User.objects.all()
     serializer_class = UserAdminSerializer
-    #permission_classes = (AllowAny,)
-    #pagination_class = PageNumberPagination
+    permission_classes = (IsAdminSuperuser,)
+    pagination_class = PageNumberPagination
     lookup_field = 'username'
+    http_method_names = ['get', 'post', 'patch', 'delete']
 
     @action(detail=False, methods=['get', 'patch'],
-            permission_classes=[IsAuthenticated],
+            permission_classes=[IsAuthenticated,],
             serializer_class=UserSerializer,
-            pagination_class=None)
+            pagination_class=None,
+            queryset=User.objects.all())
     def me(self, request):
         if request.method == 'GET':
-            serializer = self.get_serializer(request.user)
+            serializer = self.serializer_class(request.user)
             return Response(serializer.data, status=status.HTTP_200_OK)
-        serializer = self.get_serializer(
+        serializer = self.serializer_class(
             request.user, data=request.data, partial=True)
         serializer.is_valid(raise_exception=True)
         serializer.save()
