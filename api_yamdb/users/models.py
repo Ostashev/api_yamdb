@@ -9,13 +9,13 @@ class User(AbstractUser):
         ('admin', 'admin'),
     )
 
-    username = models.CharField(
+    username = models.SlugField(
         max_length=50,
         unique=True,
         verbose_name='Имя пользователя'
     )
     email = models.EmailField(
-        max_length=50,
+        max_length=254,
         unique=True,
         verbose_name='Адрес электронной почты'
     )
