@@ -21,7 +21,7 @@ class ReviewViewSet(viewsets.ModelViewSet):
         title = get_object_or_404(Title, id=self.kwargs.get('title_id'))
         ratings = Review.objects.filter(title=title).values_list('score')
         title.rating = round(
-            sum(ratings) + serializer.data.get('score') / len(ratings) + 1,
+            (sum(ratings) + serializer.data.get('score')) / (len(ratings) + 1),
             RATING_DIGITS_SHOWN
         )
         serializer.save(author=self.request.user, title=title)
