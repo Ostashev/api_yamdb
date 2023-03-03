@@ -1,8 +1,8 @@
 from rest_framework import serializers
-from titles.models import Comment, Review
+from rest_framework.validators import UniqueTogetherValidator
 
 from users.models import User
-from rest_framework.validators import UniqueTogetherValidator
+from titles.models import Comment, Review, Category, Genre, Title
 
 
 class UserSerializer(serializers.ModelSerializer):
@@ -81,6 +81,27 @@ class GetTokenSerializer(serializers.Serializer):
     class Meta:
         model = User
         fields = ('username', 'confirmation_code')
+
+
+class CategotySerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = Category
+        fields = ('__all__')
+
+
+class GenreSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = Genre
+        fields = ('__all__')
+
+
+class TitleSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = Title
+        fields = ('__all__')
 
 
 class ReviewSerializer(serializers.ModelSerializer):
