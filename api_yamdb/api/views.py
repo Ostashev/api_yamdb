@@ -7,11 +7,15 @@ from django.contrib.auth.tokens import default_token_generator
 from django.core.mail import send_mail
 from rest_framework.response import Response
 from rest_framework.decorators import action, api_view, permission_classes
-from rest_framework.permissions import AllowAny, IsAuthenticated
+from rest_framework.permissions import AllowAny, IsAuthenticated, IsAuthenticatedOrReadOnly
 from rest_framework_simplejwt.tokens import RefreshToken
 from django.shortcuts import get_object_or_404
 from rest_framework.pagination import PageNumberPagination
 from rest_framework import mixins
+
+from django_filters.rest_framework import DjangoFilterBackend
+from rest_framework import filters
+
 from django.shortcuts import get_object_or_404
 from rest_framework import viewsets
 from rest_framework.pagination import PageNumberPagination
@@ -27,7 +31,6 @@ from titles.models import (Comment, Review, Title,
                            Genre, Category, Title)
 
 
-
 RATING_DIGITS_SHOWN = 2
 
 
@@ -38,6 +41,9 @@ class UserViewSet(viewsets.ModelViewSet):
     pagination_class = PageNumberPagination
     lookup_field = 'username'
     http_method_names = ['get', 'post', 'patch', 'delete']
+    filter_backends = (DjangoFilterBackend, filters.SearchFilter)
+    filterset_fields = ('username',)
+    search_fields = ('username',)
 
     @action(detail=False, methods=['get', 'patch'],
             permission_classes=[IsAuthenticated,],
@@ -67,7 +73,8 @@ def signup(request):
         serializer.save()
         user = User.objects.filter(**serializer.data)
         get_and_send_confirmation_code(user)
-    return Response(serializer.data, status=status.HTTP_200_OK)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
 @api_view(['POST'])
@@ -95,7 +102,7 @@ def get_and_send_confirmation_code(data):
 
 
 class ReviewViewSet(viewsets.ModelViewSet):
-    permission_classes = ...
+    permission_classes = (IsAuthorModeratorAdminSuperuserOrReadOnly, IsAuthenticatedOrReadOnly)
     pagination_class = PageNumberPagination
     serializer_class = serializers.ReviewSerializer
 
@@ -113,7 +120,7 @@ class ReviewViewSet(viewsets.ModelViewSet):
 
 
 class CommentViewSet(viewsets.ModelViewSet):
-    permission_classes = ...
+    permission_classes = (IsAuthorModeratorAdminSuperuserOrReadOnly,)
     pagination_class = PageNumberPagination
     serializer_class = serializers.CommentSerializer
 

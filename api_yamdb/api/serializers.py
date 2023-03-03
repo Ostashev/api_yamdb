@@ -53,12 +53,12 @@ class UserAdminSerializer(serializers.ModelSerializer):
             )
         ]
 
-    # def validate(self, value):
-    #     if value == 'me':
-    #         raise serializers.ValidationError(
-    #             'Использовать имя "me" в качестве username запрещено!'
-    #         )
-    #     return value
+    def validate(self, value):
+        if value == 'me':
+            raise serializers.ValidationError(
+                'Использовать имя "me" в качестве username запрещено!'
+            )
+        return value
 
 
 class SignUpSerializer(serializers.ModelSerializer):
