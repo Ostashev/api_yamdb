@@ -42,8 +42,16 @@ class Review(models.Model):
         User, on_delete=models.CASCADE, related_name='reviews')
     score = models.IntegerField()
     pub_date = models.DateTimeField(auto_now_add=True)
-    
-    
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                fields=['title', 'author'],
+                name='unique_review'
+            )
+        ]
+
+
 class Comment(models.Model):
     review = models.ForeignKey(
         Review, on_delete=models.CASCADE, related_name='comments')
