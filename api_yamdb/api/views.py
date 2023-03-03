@@ -24,8 +24,8 @@ from rest_framework import viewsets
 from users.models import User
 from users.utils import generate_confirmation_code
 from .serializers import (UserSerializer, UserAdminSerializer, SignUpSerializer, GetTokenSerializer,
-                          CategotySerializer, GenreSerializer, TitleSerializer)
-from . permissions import IsAdmin, IsAdminSuperuser, IsAuthorModeratorAdminSuperuserOrReadOnly
+                          CategotySerializer, GenreSerializer, TitleSerializer, TitleCreateSerializer)
+from . permissions import IsAdmin, IsAdminSuperuser, IsAuthorModeratorAdminSuperuserOrReadOnly, ReadOnly
 from . import serializers
 from titles.models import (Comment, Review, Title, 
                            Genre, Category, Title)
@@ -147,14 +147,21 @@ class CategoryViewSet(viewsets.ModelViewSet):
     """Получить список всех категорий. Права доступа: Доступно без токена."""
     queryset = Category.objects.all()
     serializer_class = (CategotySerializer)
-    permission_classes = ()
-    filter_backends = ()
+    permission_classes = (IsAdmin,)
+    filter_backends = (filters.SearchFilter,)
     search_fields = ('name', )
+    lookup_field = 'slug'
 
 
 class TitleViewSet(viewsets.ModelViewSet):
     """Получить список всех объектов."""
     queryset = Title.objects.all()
     serializer_class = (TitleSerializer)
-    permission_classes = (IsAdminSuperuser)
-    filter_backends = ()
+    permission_classes = (IsAdmin,)
+    filter_backends = (filters.SearchFilter,)
+
+    def get_serializer_class(self):
+        if self.action in ('list', 'retrieve'):
+            return TitleSerializer
+        return TitleCreateSerializer
+
