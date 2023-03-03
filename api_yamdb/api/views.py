@@ -1,4 +1,5 @@
 from smtplib import SMTPResponseException
+
 from django.shortcuts import render
 from django.conf import settings
 from rest_framework import status, viewsets
@@ -11,25 +12,24 @@ from rest_framework_simplejwt.tokens import RefreshToken
 from django.shortcuts import get_object_or_404
 from rest_framework.pagination import PageNumberPagination
 from rest_framework import mixins
+
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import filters
 
-from users.models import User
-from users.utils import generate_confirmation_code
-from .serializers import UserSerializer, UserAdminSerializer, SignUpSerializer, GetTokenSerializer
-from . permissions import IsAdmin, IsAdminSuperuser, IsAuthorModeratorAdminSuperuserOrReadOnly
-
 from django.shortcuts import get_object_or_404
-
 from rest_framework import viewsets
 from rest_framework.pagination import PageNumberPagination
-
-from . import serializers
-from titles.models import Comment, Review, Title
-
 from rest_framework import viewsets
 
-from titles.models import Genre, Category
+from users.models import User
+from users.utils import generate_confirmation_code
+from .serializers import (UserSerializer, UserAdminSerializer, SignUpSerializer, GetTokenSerializer,
+                          CategotySerializer, GenreSerializer, TitleSerializer)
+from . permissions import IsAdmin, IsAdminSuperuser, IsAuthorModeratorAdminSuperuserOrReadOnly
+from . import serializers
+from titles.models import (Comment, Review, Title, 
+                           Genre, Category, Title)
+
 
 RATING_DIGITS_SHOWN = 2
 
@@ -137,7 +137,7 @@ class CommentViewSet(viewsets.ModelViewSet):
 class GenreViewSet(viewsets.ModelViewSet):
     """Получить список всех жанров."""
     queryset = Genre.objects.all()
-    serializer_class = ()
+    serializer_class = (GenreSerializer)
     permission_classes = ()
     filter_backends = ()
     search_fields = ('name', )
@@ -146,7 +146,7 @@ class GenreViewSet(viewsets.ModelViewSet):
 class CategoryViewSet(viewsets.ModelViewSet):
     """Получить список всех категорий. Права доступа: Доступно без токена."""
     queryset = Category.objects.all()
-    serializer_class = ()
+    serializer_class = (CategotySerializer)
     permission_classes = ()
     filter_backends = ()
     search_fields = ('name', )
@@ -155,5 +155,6 @@ class CategoryViewSet(viewsets.ModelViewSet):
 class TitleViewSet(viewsets.ModelViewSet):
     """Получить список всех объектов."""
     queryset = Title.objects.all()
-    permission_classes = ()
+    serializer_class = (TitleSerializer)
+    permission_classes = (IsAdminSuperuser)
     filter_backends = ()
