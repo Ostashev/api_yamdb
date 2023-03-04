@@ -24,6 +24,7 @@ from rest_framework import viewsets
 
 from users.models import User
 from users.utils import generate_confirmation_code
+from .mixins import ModelMixinSet
 from .serializers import (UserSerializer, UserAdminSerializer, SignUpSerializer, GetTokenSerializer,
                           CategotySerializer, GenreSerializer, TitleSerializer, TitleCreateSerializer)
 from . permissions import IsAdmin, IsAdminSuperuser, IsAuthorModeratorAdminSuperuserOrReadOnly, ReadOnly
@@ -159,16 +160,17 @@ class CommentViewSet(viewsets.ModelViewSet):
         )
         
         
-class GenreViewSet(viewsets.ModelViewSet):
+class GenreViewSet(ModelMixinSet):
     """Получить список всех жанров."""
     queryset = Genre.objects.all()
     serializer_class = (GenreSerializer)
     permission_classes = ()
-    filter_backends = ()
+    filter_backends = (filters.SearchFilter,)
     search_fields = ('name', )
+    lookup_field = 'slug'
 
 
-class CategoryViewSet(viewsets.ModelViewSet):
+class CategoryViewSet(ModelMixinSet):
     """Получить список всех категорий. Права доступа: Доступно без токена."""
     queryset = Category.objects.all()
     serializer_class = (CategotySerializer)
@@ -184,6 +186,7 @@ class TitleViewSet(viewsets.ModelViewSet):
     serializer_class = (TitleSerializer)
     permission_classes = (IsAdmin,)
     filter_backends = (filters.SearchFilter,)
+    
 
     def get_serializer_class(self):
         if self.action in ('list', 'retrieve'):
