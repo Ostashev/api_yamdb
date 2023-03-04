@@ -33,6 +33,7 @@ class Title(models.Model):
         Category, on_delete=models.SET_NULL,
         related_name='titles', null=True, blank=True
     )
+    rating = models.IntegerField(null=True)
 
 class Review(models.Model):
     title = models.ForeignKey(
