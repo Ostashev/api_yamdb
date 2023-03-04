@@ -18,6 +18,7 @@ from rest_framework import filters
 
 from django.shortcuts import get_object_or_404
 from rest_framework import viewsets
+from rest_framework.serializers import ValidationError
 from rest_framework.pagination import PageNumberPagination
 from rest_framework import viewsets
 
@@ -27,7 +28,7 @@ from .serializers import (UserSerializer, UserAdminSerializer, SignUpSerializer,
                           CategotySerializer, GenreSerializer, TitleSerializer, TitleCreateSerializer)
 from . permissions import IsAdmin, IsAdminSuperuser, IsAuthorModeratorAdminSuperuserOrReadOnly, ReadOnly
 from . import serializers
-from titles.models import (Comment, Review, Title, 
+from reviews.models import (Comment, Review, Title, 
                            Genre, Category, Title)
 
 
@@ -102,21 +103,45 @@ def get_and_send_confirmation_code(data):
 
 
 class ReviewViewSet(viewsets.ModelViewSet):
-    permission_classes = (IsAuthorModeratorAdminSuperuserOrReadOnly, IsAuthenticatedOrReadOnly)
+    permission_classes = (IsAuthorModeratorAdminSuperuserOrReadOnly,
+                          IsAuthenticatedOrReadOnly)
     pagination_class = PageNumberPagination
     serializer_class = serializers.ReviewSerializer
 
     def get_queryset(self):
         return Review.objects.filter(title=self.kwargs.get('title_id'))
 
+    def create(self, request, *args, **kwargs):
+        if self.request.user.reviews.filter(
+            title=self.kwargs.get('title_id')
+        ).exists():
+            raise ValidationError('Review already exists.')
+        return super().create(request, *args, **kwargs)
+
     def perform_create(self, serializer):
         title = get_object_or_404(Title, id=self.kwargs.get('title_id'))
-        ratings = Review.objects.filter(title=title).values_list('score')
+        ratings = Review.objects.filter(title=title).values_list(
+            'score', flat=True
+        )
         title.rating = round(
-            (sum(ratings) + serializer.data.get('score')) / (len(ratings) + 1),
+            (sum(ratings) + int(self.request.data.get('score')))
+            / (len(ratings) + 1),
             RATING_DIGITS_SHOWN
         )
+        title.save()
         serializer.save(author=self.request.user, title=title)
+
+    def perform_update(self, serializer):
+        serializer.save()
+        title = get_object_or_404(Title, id=self.kwargs.get('title_id'))
+        ratings = Review.objects.filter(title=title).values_list(
+            'score', flat=True
+        )
+        title.rating = round(
+            (sum(ratings)) / (len(ratings)),
+            RATING_DIGITS_SHOWN
+        )
+        title.save()
 
 
 class CommentViewSet(viewsets.ModelViewSet):
