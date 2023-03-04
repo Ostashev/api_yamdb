@@ -118,6 +118,7 @@ class TitleSerializer(serializers.ModelSerializer):
             'category',
             'genre',
         )
+        
 
 
 class TitleCreateSerializer(serializers.ModelSerializer):
