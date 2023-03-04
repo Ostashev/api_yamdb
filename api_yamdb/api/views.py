@@ -64,12 +64,12 @@ class UserViewSet(viewsets.ModelViewSet):
 
 
 @api_view(['POST'])
+@permission_classes([AllowAny])
 def signup(request):
     user = User.objects.filter(**request.data)
     if user.exists():
         get_and_send_confirmation_code(user)
         return Response(request.data, status=status.HTTP_200_OK)
-
     serializer = SignUpSerializer(data=request.data)
     if serializer.is_valid(raise_exception=True):
         serializer.save()
