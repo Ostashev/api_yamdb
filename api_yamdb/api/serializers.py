@@ -1,9 +1,7 @@
 from rest_framework import serializers
 from rest_framework.validators import UniqueTogetherValidator
-from rest_framework.exceptions import NotAuthenticated
-
+from reviews.models import Category, Comment, Genre, Review, Title
 from users.models import User
-from reviews.models import Comment, Review, Category, Genre, Title
 
 
 class UserSerializer(serializers.ModelSerializer):
@@ -13,8 +11,6 @@ class UserSerializer(serializers.ModelSerializer):
     [POST] заполнение полей 'first_name', 'last_name' и 'bio'.
     """
     role = serializers.StringRelatedField(read_only=True)
-    #username = serializers.SlugField(read_only=True)
-    #email = serializers.SlugField(max_length=254, read_only=True)
 
     class Meta:
         model = User
@@ -66,6 +62,12 @@ class SignUpSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = ('username', 'email')
+        validators = [
+            UniqueTogetherValidator(
+                queryset=User.objects.all(),
+                fields=['username', 'email']
+            )
+        ]
 
     def validate(self, value):
         if value['username'] == 'me':
@@ -89,6 +91,7 @@ class CategotySerializer(serializers.ModelSerializer):
     class Meta:
         model = Category
         exclude = ('id', )
+        lookup_field = 'slug'
 
 
 class GenreSerializer(serializers.ModelSerializer):
@@ -96,6 +99,7 @@ class GenreSerializer(serializers.ModelSerializer):
     class Meta:
         model = Genre
         exclude = ('id', )
+        lookup_field = 'slug'
 
 
 class TitleSerializer(serializers.ModelSerializer):
@@ -114,7 +118,6 @@ class TitleSerializer(serializers.ModelSerializer):
             'category',
             'genre',
         )
-
 
 
 class TitleCreateSerializer(serializers.ModelSerializer):
@@ -138,7 +141,6 @@ class TitleCreateSerializer(serializers.ModelSerializer):
             'category',
             'genre',
         )
-
 
 
 class ReviewSerializer(serializers.ModelSerializer):

@@ -1,6 +1,7 @@
 from django.db import models
 from users.models import User
 
+
 class Category(models.Model):
     name = models.CharField(max_length=256)
     slug = models.SlugField(max_length=50, unique=True, db_index=True)
@@ -8,6 +9,7 @@ class Category(models.Model):
     class Meta:
         verbose_name = 'Категория'
         verbose_name_plural = 'Категории'
+        ordering = ('id',)
 
     def __str__(self):
         return self.name
@@ -20,13 +22,13 @@ class Genre(models.Model):
     class Meta:
         verbose_name = 'Жанр'
         verbose_name_plural = 'Жанры'
+        ordering = ('id',)
 
 
 class Title(models.Model):
     name = models.CharField(max_length=256)
     year = models.IntegerField('год')
     description = models.TextField(max_length=256, blank=True)
-    rating = models.IntegerField(default=0)
     genre = models.ManyToManyField(
         Genre, related_name='titles',
     )
@@ -34,6 +36,11 @@ class Title(models.Model):
         Category, on_delete=models.SET_NULL,
         related_name='titles', null=True, blank=True
     )
+    rating = models.IntegerField(null=True)
+
+    class Meta:
+        ordering = ('id',)
+
 
 class Review(models.Model):
     title = models.ForeignKey(
@@ -51,6 +58,7 @@ class Review(models.Model):
                 name='unique_review'
             )
         ]
+        ordering = ('id',)
 
 
 class Comment(models.Model):
@@ -61,3 +69,5 @@ class Comment(models.Model):
         User, on_delete=models.CASCADE, related_name='comments')
     pub_date = models.DateTimeField(auto_now_add=True)
 
+    class Meta:
+        ordering = ('id',)
