@@ -12,6 +12,7 @@ from rest_framework_simplejwt.tokens import RefreshToken
 from django.shortcuts import get_object_or_404
 from rest_framework.pagination import PageNumberPagination
 from rest_framework import mixins
+from rest_framework.exceptions import NotAuthenticated
 
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import filters
@@ -145,9 +146,14 @@ class ReviewViewSet(viewsets.ModelViewSet):
 
 
 class CommentViewSet(viewsets.ModelViewSet):
-    permission_classes = (IsAuthorModeratorAdminSuperuserOrReadOnly,)
+    permission_classes = (IsAuthorModeratorAdminSuperuserOrReadOnly, IsAuthenticatedOrReadOnly)
     pagination_class = PageNumberPagination
     serializer_class = serializers.CommentSerializer
+
+    def create(self, request, *args, **kwargs):
+        if not request.user.is_authenticated:
+            raise NotAuthenticated('Unauthorised')
+        return super().create(request, *args, **kwargs)
 
     def get_queryset(self):
         return Comment.objects.filter(review=self.kwargs.get('review_id'))
@@ -184,6 +190,7 @@ class TitleViewSet(viewsets.ModelViewSet):
     serializer_class = (TitleSerializer)
     permission_classes = (IsAdmin,)
     filter_backends = (filters.SearchFilter,)
+    
 
     def get_serializer_class(self):
         if self.action in ('list', 'retrieve'):
