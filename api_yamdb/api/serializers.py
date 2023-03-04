@@ -1,8 +1,7 @@
 from rest_framework import serializers
 from rest_framework.validators import UniqueTogetherValidator
-
+from reviews.models import Category, Comment, Genre, Review, Title
 from users.models import User
-from reviews.models import Comment, Review, Category, Genre, Title
 
 
 class UserSerializer(serializers.ModelSerializer):
@@ -12,8 +11,6 @@ class UserSerializer(serializers.ModelSerializer):
     [POST] заполнение полей 'first_name', 'last_name' и 'bio'.
     """
     role = serializers.StringRelatedField(read_only=True)
-    #username = serializers.SlugField(read_only=True)
-    #email = serializers.SlugField(max_length=254, read_only=True)
 
     class Meta:
         model = User
@@ -124,7 +121,6 @@ class TitleSerializer(serializers.ModelSerializer):
         
 
 
-
 class TitleCreateSerializer(serializers.ModelSerializer):
     category = serializers.SlugRelatedField(
         slug_field='slug',
@@ -146,7 +142,6 @@ class TitleCreateSerializer(serializers.ModelSerializer):
             'category',
             'genre',
         )
-
 
 
 class ReviewSerializer(serializers.ModelSerializer):

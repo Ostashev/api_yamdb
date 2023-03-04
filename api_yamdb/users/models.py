@@ -1,5 +1,5 @@
-from django.db import models
 from django.contrib.auth.models import AbstractUser
+from django.db import models
 
 
 class User(AbstractUser):
@@ -45,14 +45,14 @@ class User(AbstractUser):
         verbose_name='Код'
     )
 
-
     class Meta:
         verbose_name = 'Пользователь'
         verbose_name_plural = 'Пользователи'
+        ordering = ('id',)
 
     def __str__(self):
         return self.username
-    
+
     @property
     def is_admin(self):
         return self.role == 'admin'
@@ -64,5 +64,3 @@ class User(AbstractUser):
     @property
     def is_user(self):
         return self.role == 'user'
-
-

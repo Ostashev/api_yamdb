@@ -1,6 +1,5 @@
-from pathlib import Path
 from datetime import timedelta
-
+from pathlib import Path
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -113,7 +112,7 @@ AUTH_USER_MODEL = 'users.User'
 
 REST_FRAMEWORK = {
     'DEFAULT_PERMISSION_CLASSES': [
-        'rest_framework.permissions.AllowAny', 
+        'rest_framework.permissions.AllowAny',
     ],
     'DEFAULT_AUTHENTICATION_CLASSES': (
         'rest_framework_simplejwt.authentication.JWTAuthentication',
@@ -124,8 +123,8 @@ REST_FRAMEWORK = {
 
 SIMPLE_JWT = {
     # Устанавливаем срок жизни токена
-   'ACCESS_TOKEN_LIFETIME': timedelta(days=1),
-   'AUTH_HEADER_TYPES': ('Bearer',),
-} 
+    'ACCESS_TOKEN_LIFETIME': timedelta(days=1),
+    'AUTH_HEADER_TYPES': ('Bearer',),
+}
 
 EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
