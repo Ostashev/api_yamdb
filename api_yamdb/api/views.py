@@ -31,6 +31,7 @@ from . permissions import IsAdmin, IsAdminSuperuser, IsAuthorModeratorAdminSuper
 from . import serializers
 from reviews.models import (Comment, Review, Title, 
                            Genre, Category, Title)
+from . filters import TitleFilter
 
 
 RATING_DIGITS_SHOWN = 2
@@ -146,7 +147,7 @@ class ReviewViewSet(viewsets.ModelViewSet):
 
 
 class CommentViewSet(viewsets.ModelViewSet):
-    permission_classes = (IsAuthorModeratorAdminSuperuserOrReadOnly,)
+    permission_classes = (IsAuthorModeratorAdminSuperuserOrReadOnly, IsAuthenticatedOrReadOnly)
     pagination_class = PageNumberPagination
     serializer_class = serializers.CommentSerializer
 
@@ -164,7 +165,7 @@ class GenreViewSet(ModelMixinSet):
     """Получить список всех жанров."""
     queryset = Genre.objects.all()
     serializer_class = (GenreSerializer)
-    permission_classes = ()
+    permission_classes = (IsAdmin | ReadOnly,)
     filter_backends = (filters.SearchFilter,)
     search_fields = ('name', )
     lookup_field = 'slug'
@@ -185,7 +186,9 @@ class TitleViewSet(viewsets.ModelViewSet):
     queryset = Title.objects.all()
     serializer_class = (TitleSerializer)
     permission_classes = (IsAdmin,)
-    filter_backends = (filters.SearchFilter,)
+    filterset_class = TitleFilter
+    filter_backends = (DjangoFilterBackend,)
+    filterset_fields = ('genre__slug',)
     
 
     def get_serializer_class(self):
