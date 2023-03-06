@@ -44,10 +44,11 @@ class Title(models.Model):
         Category, on_delete=models.SET_NULL,
         related_name='titles', null=True, blank=True
     )
-    rating = models.IntegerField(null=True)
 
     class Meta:
         ordering = ('id',)
+        verbose_name = 'Произведение'
+        verbose_name_plural = 'Произведения'
 
 
 class Review(models.Model):
@@ -66,7 +67,9 @@ class Review(models.Model):
                 name='unique_review'
             )
         ]
-        ordering = ('id',)
+        ordering = ('pub_date',)
+        verbose_name = 'Отызв'
+        verbose_name_plural = 'Отызвы'
 
 
 class Comment(models.Model):
@@ -79,3 +82,5 @@ class Comment(models.Model):
 
     class Meta:
         ordering = ('id',)
+        verbose_name = 'Комментарий'
+        verbose_name_plural = 'Комментарии'
