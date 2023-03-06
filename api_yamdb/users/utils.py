@@ -1,6 +1,7 @@
-from rest_framework import serializers
-from django.core.mail import send_mail
 import uuid
+
+from django.core.mail import send_mail
+from rest_framework import serializers
 
 from api_yamdb.settings import EMAIL_ADMIN
 

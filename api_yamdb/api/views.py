@@ -11,13 +11,13 @@ from rest_framework_simplejwt.tokens import RefreshToken
 from reviews.models import Category, Comment, Genre, Review, Title
 from users.models import User
 from users.utils import get_and_send_confirmation_code
-from . import serializers
 from .filters import TitleFilter
 from .mixins import ModelMixinSet
 from .permissions import (IsAdmin, IsAdminSuperuser,
                           IsAuthorModeratorAdminSuperuserOrReadOnly, ReadOnly)
-from .serializers import (CategotySerializer, GenreSerializer,
-                          GetTokenSerializer, SignUpSerializer,
+from .serializers import (CategotySerializer, CommentSerializer,
+                          GenreSerializer, GetTokenSerializer,
+                          ReviewSerializer, SignUpSerializer,
                           TitleCreateSerializer, TitleSerializer,
                           UserAdminSerializer, UserSerializer)
 
@@ -90,7 +90,7 @@ class ReviewViewSet(viewsets.ModelViewSet):
     permission_classes = (IsAuthorModeratorAdminSuperuserOrReadOnly,
                           IsAuthenticatedOrReadOnly)
     pagination_class = PageNumberPagination
-    serializer_class = serializers.ReviewSerializer
+    serializer_class = ReviewSerializer
 
     def get_queryset(self):
         return Review.objects.filter(title=self.kwargs.get('title_id'))
@@ -110,7 +110,7 @@ class CommentViewSet(viewsets.ModelViewSet):
     permission_classes = (IsAuthorModeratorAdminSuperuserOrReadOnly,
                           IsAuthenticatedOrReadOnly)
     pagination_class = PageNumberPagination
-    serializer_class = serializers.CommentSerializer
+    serializer_class = CommentSerializer
 
     def get_queryset(self):
         return Comment.objects.filter(review=self.kwargs.get('review_id'))
