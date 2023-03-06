@@ -1,3 +1,4 @@
+from django.db.models import Avg
 from rest_framework import serializers
 from rest_framework.validators import UniqueTogetherValidator
 from reviews.models import Category, Comment, Genre, Review, Title
@@ -100,7 +101,13 @@ class GenreSerializer(serializers.ModelSerializer):
 class TitleSerializer(serializers.ModelSerializer):
     category = CategotySerializer(read_only=True)
     genre = GenreSerializer(many=True, read_only=True)
-    rating = serializers.IntegerField(read_only=True)
+    rating = serializers.SerializerMethodField(read_only=True)
+
+    def get_rating(self, obj):
+        rating = obj.reviews.aggregate(Avg('score')).get('score__avg')
+        if rating:
+            return round(rating, 2)
+        return None
 
     class Meta:
         model = Title
@@ -138,13 +145,25 @@ class TitleCreateSerializer(serializers.ModelSerializer):
         )
 
 
+class UsernameRelatedField(serializers.StringRelatedField):
+    def to_representation(self, value):
+        return value.username
+
+
 class ReviewSerializer(serializers.ModelSerializer):
-    author = serializers.StringRelatedField()
+    author = UsernameRelatedField()
 
     def validate(self, attrs):
         if not (1 <= attrs.get('score') <= 10):
             raise serializers.ValidationError(
                 'Score must be an integer value between 1 and 10.')
+
+        if self.context.get('action') == 'create' and Review.objects.filter(
+            title=self.context.get('title'),
+            author=self.context.get('request').user
+        ).exists():
+            raise serializers.ValidationError(
+                'Review for this title already exists.')
         return attrs
 
     class Meta:
@@ -154,7 +173,7 @@ class ReviewSerializer(serializers.ModelSerializer):
 
 
 class CommentSerializer(serializers.ModelSerializer):
-    author = serializers.StringRelatedField()
+    author = UsernameRelatedField()
 
     class Meta:
         model = Comment
