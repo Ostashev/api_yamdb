@@ -2,6 +2,7 @@ from rest_framework import serializers
 from rest_framework.validators import UniqueTogetherValidator
 from reviews.models import Category, Comment, Genre, Review, Title
 from users.models import User
+from users.utils import no_name
 
 
 class UserSerializer(serializers.ModelSerializer):
@@ -50,11 +51,8 @@ class UserAdminSerializer(serializers.ModelSerializer):
             )
         ]
 
-    def validate(self, value):
-        if value == 'me':
-            raise serializers.ValidationError(
-                'Использовать имя "me" в качестве username запрещено!'
-            )
+    def validate_username(self, value):
+        no_name(value)
         return value
 
 
@@ -70,10 +68,7 @@ class SignUpSerializer(serializers.ModelSerializer):
         ]
 
     def validate(self, value):
-        if value['username'] == 'me':
-            raise serializers.ValidationError(
-                'Использовать имя "me" в качестве username запрещено!'
-            )
+        no_name(value['username'])
         return value
 
 

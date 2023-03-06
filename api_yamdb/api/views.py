@@ -1,4 +1,3 @@
-from django.core.mail import send_mail
 from django.shortcuts import get_object_or_404
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import filters, status, viewsets
@@ -11,7 +10,7 @@ from rest_framework.serializers import ValidationError
 from rest_framework_simplejwt.tokens import RefreshToken
 from reviews.models import Category, Comment, Genre, Review, Title
 from users.models import User
-from users.utils import generate_confirmation_code
+from users.utils import get_and_send_confirmation_code
 
 from . import serializers
 from .filters import TitleFilter
@@ -56,25 +55,26 @@ class UserViewSet(viewsets.ModelViewSet):
 @api_view(['POST'])
 @permission_classes([AllowAny])
 def signup(request):
-    user = User.objects.filter(username=request.data.get('username'),
-                               email=request.data.get('email'))
-    if user.exists():
-        get_and_send_confirmation_code(user)
-        return Response(request.data, status=status.HTTP_200_OK)
+    if request.data.get('username') and request.data.get('email'):
+        user = User.objects.filter(username=request.data.get('username'),
+                                   email=request.data.get('email'))
+        if user.exists():
+            get_and_send_confirmation_code(user)
+            return Response(request.data, status=status.HTTP_200_OK)
     serializer = SignUpSerializer(data=request.data)
-    if serializer.is_valid(raise_exception=True):
-        serializer.save()
-        user = User.objects.filter(**serializer.data)
-        get_and_send_confirmation_code(user)
-        return Response(serializer.data, status=status.HTTP_200_OK)
-    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    serializer.is_valid(raise_exception=True)
+    serializer.save()
+    user = User.objects.filter(**serializer.data)
+    get_and_send_confirmation_code(user)
+    return Response(serializer.data, status=status.HTTP_200_OK)
 
 
 @api_view(['POST'])
 def token(request):
     serializer = GetTokenSerializer(data=request.data)
     serializer.is_valid(raise_exception=True)
-    user = get_object_or_404(User, username=serializer.data['username'])
+    user = get_object_or_404(
+        User, username=serializer.validated_data['username'])
     if serializer.data['confirmation_code'] == user.confirmation_code:
         refresh = RefreshToken.for_user(user)
         return Response(
@@ -85,16 +85,6 @@ def token(request):
         'Проверьте правильность указанных для получения токена данных.',
         status=status.HTTP_400_BAD_REQUEST
     )
-
-
-def get_and_send_confirmation_code(data):
-    confirmation_code = generate_confirmation_code()
-    data.update(confirmation_code=confirmation_code)
-    subject = 'Ваш код, для получения token.'
-    message = (
-        f'Для получения token отправьте код {confirmation_code} и имя '
-        'пользователя на адрес: http://127.0.0.1:8000/api/v1/auth/token/')
-    send_mail(subject, message, '123@rt.ru', [data[0].email])
 
 
 class ReviewViewSet(viewsets.ModelViewSet):
