@@ -1,10 +1,15 @@
 from django.db import models
+
+from reviews.validators import validate_year
 from users.models import User
 
 
 class Category(models.Model):
-    name = models.CharField(max_length=256)
-    slug = models.SlugField(max_length=50, unique=True, db_index=True)
+    name = models.CharField('Имя категории', max_length=256)
+    slug = models.SlugField('Слаг категории',
+                            max_length=50,
+                            unique=True,
+                            db_index=True)
 
     class Meta:
         verbose_name = 'Категория'
@@ -16,8 +21,11 @@ class Category(models.Model):
 
 
 class Genre(models.Model):
-    name = models.CharField(max_length=256)
-    slug = models.SlugField(max_length=50, unique=True, db_index=True)
+    name = models.CharField('Имя жанра', max_length=256)
+    slug = models.SlugField('Слаг жанра',
+                            max_length=50,
+                            unique=True,
+                            db_index=True)
 
     class Meta:
         verbose_name = 'Жанр'
@@ -26,20 +34,21 @@ class Genre(models.Model):
 
 
 class Title(models.Model):
-    name = models.CharField(max_length=256)
-    year = models.IntegerField('год')
-    description = models.TextField(max_length=256, blank=True)
+    name = models.CharField('название', max_length=256)
+    year = models.IntegerField('год', validators=[validate_year])
+    description = models.TextField('описание', max_length=256, blank=True)
     genre = models.ManyToManyField(
-        Genre, related_name='titles',
+        Genre, related_name='titles', verbose_name='жанр'
     )
     category = models.ForeignKey(
         Category, on_delete=models.SET_NULL,
         related_name='titles', null=True, blank=True
     )
-    rating = models.IntegerField(null=True)
 
     class Meta:
         ordering = ('id',)
+        verbose_name = 'Произведение'
+        verbose_name_plural = 'Произведения'
 
 
 class Review(models.Model):
@@ -58,7 +67,9 @@ class Review(models.Model):
                 name='unique_review'
             )
         ]
-        ordering = ('id',)
+        ordering = ('pub_date',)
+        verbose_name = 'Отызв'
+        verbose_name_plural = 'Отызвы'
 
 
 class Comment(models.Model):
@@ -71,3 +82,5 @@ class Comment(models.Model):
 
     class Meta:
         ordering = ('id',)
+        verbose_name = 'Комментарий'
+        verbose_name_plural = 'Комментарии'
