@@ -7,10 +7,10 @@ from rest_framework.permissions import (AllowAny, IsAuthenticated,
                                         IsAuthenticatedOrReadOnly)
 from rest_framework.response import Response
 from rest_framework_simplejwt.tokens import RefreshToken
+
 from reviews.models import Category, Comment, Genre, Review, Title
 from users.models import User
 from users.utils import get_and_send_confirmation_code
-
 from . import serializers
 from .filters import TitleFilter
 from .mixins import ModelMixinSet
