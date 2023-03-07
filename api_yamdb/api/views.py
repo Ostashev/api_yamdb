@@ -1,3 +1,4 @@
+from django.db.models import Avg
 from django.shortcuts import get_object_or_404
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import filters, status, viewsets
@@ -20,8 +21,6 @@ from .serializers import (CategotySerializer, CommentSerializer,
                           ReviewSerializer, SignUpSerializer,
                           TitleCreateSerializer, TitleSerializer,
                           UserAdminSerializer, UserSerializer)
-
-RATING_DIGITS_SHOWN = 2
 
 
 class UserViewSet(viewsets.ModelViewSet):
@@ -144,7 +143,8 @@ class CategoryViewSet(ModelMixinSet):
 
 class TitleViewSet(viewsets.ModelViewSet):
     """Получить список всех объектов."""
-    queryset = Title.objects.all()
+    queryset = Title.objects.annotate(
+        rating=Avg('reviews__score')).order_by('id')
     serializer_class = (TitleSerializer)
     permission_classes = (IsAdmin,)
     filterset_class = TitleFilter
