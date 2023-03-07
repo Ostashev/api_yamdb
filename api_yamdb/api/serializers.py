@@ -1,10 +1,11 @@
-from django.db.models import Avg
 from rest_framework import serializers
 from rest_framework.validators import UniqueTogetherValidator
 
 from reviews.models import Category, Comment, Genre, Review, Title
 from users.models import User
 from users.utils import no_name
+
+RATING_DIGITS_SHOWN = 2
 
 
 class UserSerializer(serializers.ModelSerializer):
@@ -105,9 +106,8 @@ class TitleSerializer(serializers.ModelSerializer):
     rating = serializers.SerializerMethodField(read_only=True)
 
     def get_rating(self, obj):
-        rating = obj.reviews.aggregate(Avg('score')).get('score__avg')
-        if rating:
-            return round(rating, 2)
+        if obj.rating:
+            return round(obj.rating, 2)
         return None
 
     class Meta:
@@ -146,13 +146,10 @@ class TitleCreateSerializer(serializers.ModelSerializer):
         )
 
 
-class UsernameRelatedField(serializers.StringRelatedField):
-    def to_representation(self, value):
-        return value.username
-
-
 class ReviewSerializer(serializers.ModelSerializer):
-    author = UsernameRelatedField()
+    author = serializers.SlugRelatedField(
+        slug_field='username', read_only=True
+    )
 
     def validate(self, attrs):
         if not (1 <= attrs.get('score') <= 10):
@@ -174,7 +171,9 @@ class ReviewSerializer(serializers.ModelSerializer):
 
 
 class CommentSerializer(serializers.ModelSerializer):
-    author = UsernameRelatedField()
+    author = serializers.SlugRelatedField(
+        slug_field='username', read_only=True
+    )
 
     class Meta:
         model = Comment
