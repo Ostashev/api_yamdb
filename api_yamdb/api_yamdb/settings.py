@@ -1,23 +1,14 @@
 from datetime import timedelta
 from pathlib import Path
-import environ
 
-
-env = environ.Env()
-environ.Env.read_env()
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-# SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = 'p&l%385148kslhtyn^##a1)ilz@4zqj=rq&agdol^##zgl9(vs'
 
-# SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
 ALLOWED_HOSTS = ['*']
-
-
-# Application definition
 
 INSTALLED_APPS = [
     'api.apps.ApiConfig',
@@ -65,18 +56,12 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'api_yamdb.wsgi.application'
 
-
-# Database
-
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
         'NAME': BASE_DIR / 'db.sqlite3',
     }
 }
-
-
-# Password validation
 
 AUTH_PASSWORD_VALIDATORS = [
     {
@@ -93,9 +78,6 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
-
-# Internationalization
-
 LANGUAGE_CODE = 'en-us'
 
 TIME_ZONE = 'UTC'
@@ -105,9 +87,6 @@ USE_I18N = True
 USE_L10N = True
 
 USE_TZ = True
-
-
-# Static files (CSS, JavaScript, Images)
 
 STATIC_URL = '/static/'
 
@@ -127,11 +106,10 @@ REST_FRAMEWORK = {
 }
 
 SIMPLE_JWT = {
-    # Устанавливаем срок жизни токена
     'ACCESS_TOKEN_LIFETIME': timedelta(days=1),
     'AUTH_HEADER_TYPES': ('Bearer',),
 }
 
 EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 
-EMAIL_ADMIN = env('EMAIL_ADMIN')
+EMAIL_ADMIN = 'admin@admin.ru'

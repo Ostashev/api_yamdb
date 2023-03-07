@@ -1,3 +1,4 @@
+from django.db.models import Avg
 from django.shortcuts import get_object_or_404
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import filters, status, viewsets
@@ -20,8 +21,6 @@ from .serializers import (CategotySerializer, CommentSerializer,
                           ReviewSerializer, SignUpSerializer,
                           TitleCreateSerializer, TitleSerializer,
                           UserAdminSerializer, UserSerializer)
-
-RATING_DIGITS_SHOWN = 2
 
 
 class UserViewSet(viewsets.ModelViewSet):
@@ -74,7 +73,8 @@ def token(request):
     serializer.is_valid(raise_exception=True)
     user = get_object_or_404(
         User, username=serializer.validated_data['username'])
-    if serializer.data['confirmation_code'] == user.confirmation_code:
+    if serializer.validated_data[
+            'confirmation_code'] == user.confirmation_code:
         refresh = RefreshToken.for_user(user)
         return Response(
             {'token': str(refresh.access_token)},
@@ -144,7 +144,8 @@ class CategoryViewSet(ModelMixinSet):
 
 class TitleViewSet(viewsets.ModelViewSet):
     """Получить список всех объектов."""
-    queryset = Title.objects.all()
+    queryset = Title.objects.annotate(
+        rating=Avg('reviews__score')).order_by('id')
     serializer_class = (TitleSerializer)
     permission_classes = (IsAdmin,)
     filterset_class = TitleFilter
