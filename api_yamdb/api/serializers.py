@@ -152,10 +152,6 @@ class ReviewSerializer(serializers.ModelSerializer):
     )
 
     def validate(self, attrs):
-        if not (1 <= attrs.get('score') <= 10):
-            raise serializers.ValidationError(
-                'Score must be an integer value between 1 and 10.')
-
         if self.context.get('action') == 'create' and Review.objects.filter(
             title=self.context.get('title'),
             author=self.context.get('request').user
