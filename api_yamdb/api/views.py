@@ -73,7 +73,8 @@ def token(request):
     serializer.is_valid(raise_exception=True)
     user = get_object_or_404(
         User, username=serializer.validated_data['username'])
-    if serializer.data['confirmation_code'] == user.confirmation_code:
+    if serializer.validated_data[
+            'confirmation_code'] == user.confirmation_code:
         refresh = RefreshToken.for_user(user)
         return Response(
             {'token': str(refresh.access_token)},
